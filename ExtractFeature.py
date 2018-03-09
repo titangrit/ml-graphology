@@ -1,3 +1,4 @@
+# This module will extract the features from the images
 import cv2
 import numpy as np
 import math
