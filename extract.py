@@ -1,10 +1,5 @@
-# This script is only used for testing on individual images.
-# For actual extraction, we use extract.py, called by feature_routine.py
-#
-#
-
-import cv2
 import numpy as np
+import cv2
 import math
 #from matplotlib import pyplot as plt
 
@@ -66,15 +61,15 @@ def straighten(image):
 	
 	# apply bilateral filter
 	filtered = bilateralFilter(image, 3)
-	cv2.imshow('filtered',filtered)
+	#cv2.imshow('filtered',filtered)
 
 	# convert to grayscale and binarize the image by INVERTED binary thresholding
 	thresh = threshold(filtered, 120)
-	cv2.imshow('thresh',thresh)
+	#cv2.imshow('thresh',thresh)
 	
 	# dilate the handwritten lines in image with a suitable kernel for contour operation
 	dilated = dilate(thresh, (5 ,100))
-	cv2.imshow('dilated',dilated)
+	#cv2.imshow('dilated',dilated)
 	
 	im2,ctrs,hier = cv2.findContours(dilated.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	
@@ -89,8 +84,9 @@ def straighten(image):
 		roi = image[y:y+h, x:x+w]
 		#rows, cols = ctr.shape[:2]
 		
-		# If the length of the line is less than half the document width, especially for the last line,
+		# If the length of the line is less than one third of the document width, especially for the last line,
 		# ignore because it may yeild inacurate baseline angle which subsequently affects proceeding features.
+		
 		if w < image.shape[1]/2 :
 			roi = 255
 			image[y:y+h, x:x+w] = roi
@@ -120,7 +116,7 @@ def straighten(image):
 		cv2.drawContours(display,[box],0,(0,0,255),1)
 		cv2.rectangle(display,(x,y),( x + w, y + h ),(0,255,0),1)
 		'''
-		print angle
+		#print angle
 		angle_sum += angle
 		countour_count += 1
 	'''	
@@ -152,7 +148,7 @@ def straighten(image):
 	# mean angle of the contours (not lines) is found
 	mean_angle = angle_sum / countour_count
 	BASELINE_ANGLE = mean_angle
-	print "Average baseline angle: "+str(mean_angle)
+	#print ("Average baseline angle: "+str(mean_angle))
 	return image
 
 ''' function to calculate horizontal projection of the image pixel rows and return it '''
@@ -374,11 +370,11 @@ def extractLines(img):
 	relative_top_margin = float(topMarginCount) / average_letter_size
 	TOP_MARGIN = relative_top_margin
 	
-	
+	'''
 	# showing the final extracted lines
 	for i, line in enumerate(fineLines):
 		cv2.imshow("line "+str(i), img[line[0]:line[1], : ])
-	
+	'''
 	
 	#print space_zero
 	#print lines
@@ -389,10 +385,11 @@ def extractLines(img):
 	#print average_line_spacing
 	#print lines_having_midzone_count
 	#print i
-	print "Average letter size: "+str(average_letter_size)
-	print "Top margin relative to average letter size: "+str(relative_top_margin)
-	print "Average line spacing relative to average letter size: "+str(relative_line_spacing)
-
+	'''
+	print ("Average letter size: "+str(average_letter_size))
+	print ("Top margin relative to average letter size: "+str(relative_top_margin))
+	print ("Average line spacing relative to average letter size: "+str(relative_line_spacing))
+	'''
 	return fineLines
 	
 ''' function to extract words from the lines using vertical projection '''
@@ -484,7 +481,7 @@ def extractWords(image, lines):
 	relative_word_spacing = average_word_spacing / LETTER_SIZE
 	WORD_SPACING = relative_word_spacing
 	#print "Average word spacing: "+str(average_word_spacing)
-	print "Average word spacing relative to average letter size: "+str(relative_word_spacing)
+	#print ("Average word spacing relative to average letter size: "+str(relative_word_spacing))
 	
 	return words
 		
@@ -503,7 +500,7 @@ def extractSlant(img, words):
 	theta = [-0.785398, -0.523599, -0.261799, -0.0872665, 0.01, 0.0872665, 0.261799, 0.523599, 0.785398]
 	#theta = [-0.785398, -0.523599, -0.436332, -0.349066, -0.261799, -0.174533, -0.0872665, 0, 0.0872665, 0.174533, 0.261799, 0.349066, 0.436332, 0.523599, 0.785398]
 
-	# Corresponding index of the biggest value will be the index of the most likely angle in 'theta'
+	# Corresponding index of the biggest value in s_function will be the index of the most likely angle in 'theta'
 	s_function = [0.0] * 9
 	count_ = [0]*9
 	
@@ -608,7 +605,7 @@ def extractSlant(img, words):
 				
 				count += 1
 			
-			
+			'''
 			if(j==0):
 				#plt.subplot(),plt.imshow(deslanted),plt.title('Output '+str(i))
 				#plt.show()
@@ -616,7 +613,7 @@ def extractSlant(img, words):
 				#print vp
 				#print 'line '+str(i)+' '+str(s_temp)
 				#print
-			
+			'''
 				
 		s_function[i] = s_temp
 		count_[i] = count
@@ -625,7 +622,7 @@ def extractSlant(img, words):
 	max_value = 0.0
 	max_index = 4
 	for index, value in enumerate(s_function):
-		print str(index)+" "+str(value)+" "+str(count_[index])
+		#print str(index)+" "+str(value)+" "+str(count_[index])
 		if(value > max_value):
 			max_value = value
 			max_index = index
@@ -659,7 +656,7 @@ def extractSlant(img, words):
 	elif(max_index == 4):
 		p = s_function[4] / s_function[3]
 		q = s_function[4] / s_function[5]
-		print 'p='+str(p)+' q='+str(q)
+		#print 'p='+str(p)+' q='+str(q)
 		# the constants here are abritrary but I think suits the best
 		if((p <= 1.2 and q <= 1.2) or (p > 1.4 and q > 1.4)):
 			angle = 0
@@ -672,23 +669,34 @@ def extractSlant(img, words):
 			angle = 180
 			result =  " : Irregular slant behaviour"
 		
+		
 		if angle == 0:
+			print "\n************************************************"
 			print "Slant determined to be straight."
 		else:
-			print "Slant determined to be erratic."
-		'''
-		type = raw_input("Enter if okay, else enter 'c' to change: ")
+			print "\n************************************************"
+			print "Slant determined to be irregular."
+		cv2.imshow("Check Image", img)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
+		type = raw_input("Press enter if okay, else enter c to change: ")
 		if type=='c':
 			if angle == 0:
 				angle = 180
-				result =  " : Irregular slant behaviour"
+				result =  " : Irregular Slant"
+				print "Set as"+result
+				print "************************************************\n"
 			else:
 				angle = 0
-				result = " : No slant"
-		'''
+				result = " : Straight/No Slant"
+				print "Set as"+result
+				print "************************************************\n"
+		else:
+			print "No Change!"
+			print "************************************************\n"
 		
 	SLANT_ANGLE = angle
-	print "Slant angle(degree): "+str(SLANT_ANGLE)+result
+	#print ("Slant angle(degree): "+str(SLANT_ANGLE)+result)
 	return
 
 ''' function to extract average pen pressure of the handwriting '''
@@ -705,7 +713,7 @@ def barometer(image):
 		for y in range(w):
 			inverted[x][y] = 255 - image[x][y]
 	
-	cv2.imshow('inverted', inverted)
+	#cv2.imshow('inverted', inverted)
 	
 	# bilateral filtering
 	filtered = bilateralFilter(inverted, 3)
@@ -713,7 +721,7 @@ def barometer(image):
 	# binary thresholding. Here we use 'threshold to zero' which is crucial for what we want.
 	# If src(x,y) is lower than threshold=100, the new pixel value will be set to 0, else it will be left untouched!
 	ret, thresh = cv2.threshold(filtered, 100, 255, cv2.THRESH_TOZERO)
-	cv2.imshow('thresh', thresh)
+	#cv2.imshow('thresh', thresh)
 	
 	# add up all the non-zero pixel values in the image and divide by the number of them to find the average pixel value in the whole image
 	total_intensity = 0
@@ -728,33 +736,42 @@ def barometer(image):
 	PEN_PRESSURE = average_intensity
 	#print total_intensity
 	#print pixel_count
-	print "Average pen pressure: "+str(average_intensity)
+	#print ("Average pen pressure: "+str(average_intensity))
 
 	return
 	
 ''' main '''
-def main():
+def start(file_name):
+
+	global BASELINE_ANGLE
+	global TOP_MARGIN
+	global LETTER_SIZE
+	global LINE_SPACING
+	global WORD_SPACING
+	global PEN_PRESSURE
+	global SLANT_ANGLE
+
 	# read image from disk
-	image = cv2.imread('images/007-0.png')
-	cv2.imshow('image',image)
+	image = cv2.imread('images/'+file_name)
+	#cv2.imshow(file_name,image)
 	
 	# Extract pen pressure. It's such a cool function name!
-	#barometer(image)
+	barometer(image)
 
 	# apply contour operation to straighten the contours which may be a single line or composed of multiple lines
 	# the returned image is straightened version of the original image without filtration and binarization
 	straightened = straighten(image)
-	cv2.imshow('straightened',straightened)
+	#cv2.imshow('straightened',straightened)
 	
 	# extract lines of handwritten text from the image using the horizontal projection
 	# it returns a 2D list of the vertical starting and ending index/pixel row location of each line in the handwriting
-	#lineIndices = extractLines(straightened)
+	lineIndices = extractLines(straightened)
 	#print lineIndices
 	#print
 	
 	# extract words from each line using vertical projection
 	# it returns a 4D list of the vertical starting and ending indices and horizontal starting and ending indices (in that order) of each word in the handwriting
-	#wordCoordinates = extractWords(straightened, lineIndices)
+	wordCoordinates = extractWords(straightened, lineIndices)
 	
 	#print wordCoordinates
 	#print len(wordCoordinates)
@@ -762,9 +779,18 @@ def main():
 	#	cv2.imshow('item '+str(i), straightened[item[0]:item[1], item[2]:item[3]])
 	
 	# extract average slant angle of all the words containing a long vertical stroke
-	#extractSlant(straightened, wordCoordinates)
+	extractSlant(straightened, wordCoordinates)
 	
-	cv2.waitKey(0)
-	return
+	#cv2.waitKey(0)
+	#cv2.destroyAllWindows()
 	
-main()
+	BASELINE_ANGLE = round(BASELINE_ANGLE, 2)
+	TOP_MARGIN = round(TOP_MARGIN, 2)
+	LETTER_SIZE = round(LETTER_SIZE, 2)
+	LINE_SPACING = round(LINE_SPACING, 2)
+	WORD_SPACING = round(WORD_SPACING, 2)
+	PEN_PRESSURE = round(PEN_PRESSURE, 2)
+	SLANT_ANGLE = round(SLANT_ANGLE, 2)
+	
+	return [BASELINE_ANGLE, TOP_MARGIN, LETTER_SIZE, LINE_SPACING, WORD_SPACING, PEN_PRESSURE, SLANT_ANGLE]
+	
