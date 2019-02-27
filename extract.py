@@ -3,9 +3,10 @@ import cv2
 import math
 #from matplotlib import pyplot as plt
 
-# please don't worry about these two variables now
+# please don't worry about these variables now
 ANCHOR_POINT = 6000
 MIDZONE_THRESHOLD = 15000
+MIN_HANDWRITING_HEIGHT_PIXEL = 20
 
 # Features are defined here as global variables
 BASELINE_ANGLE = 0.0
@@ -44,14 +45,14 @@ def erode(image, kernalSize):
 	image = cv2.erode(image, kernel, iterations=1)
 	return image
 	
-''' function for finding countours and straightening them horizontally. Straightened lines will give better result with horizontal projections. '''
+''' function for finding contours and straightening them horizontally. Straightened lines will give better result with horizontal projections. '''
 def straighten(image):
 
 	global BASELINE_ANGLE
 	
 	angle = 0.0
 	angle_sum = 0.0
-	countour_count = 0
+	contour_count = 0
 	
 	# these four variables are not being used, please ignore
 	positive_angle_sum = 0.0 #downward
@@ -77,7 +78,7 @@ def straighten(image):
 		x, y, w, h = cv2.boundingRect(ctr)
 		
 		# We can be sure the contour is not a line if height > width or height is < 20 pixels. Here 20 is arbitrary.
-		if h>w or h<20:
+		if h>w or h<MIN_HANDWRITING_HEIGHT_PIXEL:
 			continue
 		
 		# We extract the region of interest/contour to be straightened.
@@ -118,7 +119,7 @@ def straighten(image):
 		'''
 		#print angle
 		angle_sum += angle
-		countour_count += 1
+		coutour_count += 1
 	'''	
 		# sum of all the angles of downward baseline
 		if(angle>0.0):
@@ -143,10 +144,10 @@ def straighten(image):
 	
 	print "average_angle: "+str(average_angle)
 	'''
-	#cv2.imshow('countours', display)
+	#cv2.imshow('contours', display)
 	
 	# mean angle of the contours (not lines) is found
-	mean_angle = angle_sum / countour_count
+	mean_angle = angle_sum / contour_count
 	BASELINE_ANGLE = mean_angle
 	#print ("Average baseline angle: "+str(mean_angle))
 	return image
