@@ -11,8 +11,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
 warnings.simplefilter('ignore')
-sns.set(rc={'figure.figsize' : (22, 10)})
-sns.set_style("darkgrid", {'axes.grid' : True})
 
 # please don't worry about these two variables now
 ANCHOR_POINT = 6000
