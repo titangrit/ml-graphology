@@ -677,7 +677,7 @@ def extractSlant(img, words):
 		else:
 			print "Slant determined to be erratic."
 		'''
-		type = raw_input("Enter if okay, else enter 'c' to change: ")
+		type = input("Enter if okay, else enter 'c' to change: ")
 		if type=='c':
 			if angle == 0:
 				angle = 180

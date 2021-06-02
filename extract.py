@@ -1,7 +1,10 @@
 import numpy as np
 import cv2
 import math
+import pprint
 #from matplotlib import pyplot as plt
+
+pp = pprint.PrettyPrinter(indent=2)
 
 # please don't worry about these variables now
 ANCHOR_POINT = 6000
@@ -72,7 +75,8 @@ def straighten(image):
 	dilated = dilate(thresh, (5 ,100))
 	#cv2.imshow('dilated',dilated)
 	
-	im2,ctrs,hier = cv2.findContours(dilated.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	c_output = cv2.findContours(dilated.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)	
+	ctrs,hier = c_output
 	
 	for i, ctr in enumerate(ctrs):
 		x, y, w, h = cv2.boundingRect(ctr)
@@ -97,11 +101,11 @@ def straighten(image):
 		rect = cv2.minAreaRect(ctr)
 		center = rect[0]
 		angle = rect[2]
-		#print "original: "+str(i)+" "+str(angle)
+		#print( "original: "+str(i)+" "+str(angle))
 		# I actually gave a thought to this but hard to remember anyway!
 		if angle < -45.0:
 			angle += 90.0;
-		#print "+90 "+str(i)+" "+str(angle)
+		#print( "+90 "+str(i)+" "+str(angle))
 			
 		rot = cv2.getRotationMatrix2D(((x+w)/2,(y+h)/2), angle, 1)
 		#extract = cv2.warpAffine(roi, rot, (w,h), borderMode=cv2.BORDER_TRANSPARENT)
@@ -117,10 +121,10 @@ def straighten(image):
 		cv2.drawContours(display,[box],0,(0,0,255),1)
 		cv2.rectangle(display,(x,y),( x + w, y + h ),(0,255,0),1)
 		'''
-		#print angle
+		print(angle)
 		angle_sum += angle
-		coutour_count += 1
-	'''	
+		contour_count += 1
+		'''	
 		# sum of all the angles of downward baseline
 		if(angle>0.0):
 			positive_angle_sum += angle
@@ -134,22 +138,22 @@ def straighten(image):
 	if(negative_count == 0): negative_count = 1
 	average_positive_angle = positive_angle_sum / positive_count
 	average_negative_angle = negative_angle_sum / negative_count
-	print "average_positive_angle: "+str(average_positive_angle)
-	print "average_negative_angle: "+str(average_negative_angle)
+	print( "average_positive_angle: "+str(average_positive_angle))
+	print( "average_negative_angle: "+str(average_negative_angle))
 	
 	if(abs(average_positive_angle) > abs(average_negative_angle)):
 		average_angle = average_positive_angle
 	else:
 		average_angle = average_negative_angle
 	
-	print "average_angle: "+str(average_angle)
+	print( "average_angle: "+str(average_angle))
 	'''
 	#cv2.imshow('contours', display)
 	
 	# mean angle of the contours (not lines) is found
 	mean_angle = angle_sum / contour_count
 	BASELINE_ANGLE = mean_angle
-	#print ("Average baseline angle: "+str(mean_angle))
+	#print( ("Average baseline angle: "+str(mean_angle)))
 	return image
 
 ''' function to calculate horizontal projection of the image pixel rows and return it '''
@@ -199,7 +203,7 @@ def extractLines(img):
 		else:
 			break
 			
-	#print "(Top margin row count: "+str(topMarginCount)+")"
+	#print( "(Top margin row count: "+str(topMarginCount)+")")
 			
 	# FIRST we extract the straightened contours from the image by looking at occurance of 0's in the horizontal projection.
 	lineTop = 0
@@ -260,14 +264,14 @@ def extractLines(img):
 			setLineTop = True # next time we encounter value > 0, it's begining of another line/contour so we set new lineTop
 	
 	'''
-	# Printing the values we found so far.
+	# print(ing the values we found so far.)
 	for i, line in enumerate(lines):
-		print
-		print i
-		print line[0]
-		print line[1]
-		print len(hpList[line[0]:line[1]])
-		print hpList[line[0]:line[1]]
+		print()
+		print( i)
+		print( line[0])
+		print( line[1])
+		print( len(hpList[line[0]:line[1]]))
+		print( hpList[line[0]:line[1]])
 	
 	for i, line in enumerate(lines):
 		cv2.imshow("line "+str(i), img[line[0]:line[1], : ])
@@ -281,7 +285,7 @@ def extractLines(img):
 		anchorPoints = [] # python list where the indices obtained by 'anchor' will be stored
 		upHill = True # it implies that we expect to find the start of an individual line (vertically), climbing up the histogram
 		downHill = False # it implies that we expect to find the end of an individual line (vertically), climbing down the histogram
-		segment = hpList[line[0]:line[1]] # we put the region of interest of the horizontal projection of each contour here
+		segment = hpList[int(line[0]):int(line[1])] # we put the region of interest of the horizontal projection of each contour here
 		
 		for j, sum in enumerate(segment):
 			if(upHill):
@@ -299,7 +303,7 @@ def extractLines(img):
 				downHill = False
 				upHill = True
 				
-		#print anchorPoints
+		#print( anchorPoints)
 		
 		# we can ignore the contour here
 		if(len(anchorPoints)<2):
@@ -337,7 +341,7 @@ def extractLines(img):
 	lines_having_midzone_count = 0
 	flag = False
 	for i, line in enumerate(fineLines):
-		segment = hpList[line[0]:line[1]]
+		segment = hpList[int(line[0]):int(line[1])]
 		for j, sum in enumerate(segment):
 			if(sum<MIDZONE_THRESHOLD):
 				space_nonzero_row_count += 1
@@ -362,6 +366,7 @@ def extractLines(img):
 	LETTER_SIZE = average_letter_size
 	# error prevention ^-^
 	if(average_letter_size == 0): average_letter_size = 1
+	if(LETTER_SIZE == 0): LETTER_SIZE = 1
 	# We can't just take the average_line_spacing as a feature directly. We must take the average_line_spacing relative to average_letter_size.
 	# Let's take the ratio of average_line_spacing to average_letter_size as the LINE SPACING, which is perspective to average_letter_size.
 	relative_line_spacing = average_line_spacing / average_letter_size
@@ -377,19 +382,19 @@ def extractLines(img):
 		cv2.imshow("line "+str(i), img[line[0]:line[1], : ])
 	'''
 	
-	#print space_zero
-	#print lines
-	#print fineLines
-	#print midzone_row_count
-	#print total_space_row_count
-	#print len(hpList)
-	#print average_line_spacing
-	#print lines_having_midzone_count
-	#print i
+	#print( space_zero)
+	#print( lines)
+	#print( fineLines)
+	#print( midzone_row_count)
+	#print( total_space_row_count)
+	#print( len(hpList))
+	#print( average_line_spacing)
+	#print( lines_having_midzone_count)
+	#print( i)
 	'''
-	print ("Average letter size: "+str(average_letter_size))
-	print ("Top margin relative to average letter size: "+str(relative_top_margin))
-	print ("Average line spacing relative to average letter size: "+str(relative_line_spacing))
+	print( ("Average letter size: "+str(average_letter_size)))
+	print( ("Top margin relative to average letter size: "+str(relative_top_margin)))
+	print( ("Average line spacing relative to average letter size: "+str(relative_line_spacing)))
 	'''
 	return fineLines
 	
@@ -413,10 +418,10 @@ def extractWords(image, lines):
 	
 	# Isolated words or components will be extacted from each line by looking at occurance of 0's in its vertical projection.
 	for i, line in enumerate(lines):
-		extract = thresh[line[0]:line[1], 0:width] # y1:y2, x1:x2
+		extract = thresh[int(line[0]):int(line[1]), 0:width] # y1:y2, x1:x2
 		vp = verticalProjection(extract)
-		#print i
-		#print vp
+		#print( i)
+		#print( vp)
 		
 		wordStart = 0
 		wordEnd = 0
@@ -462,18 +467,18 @@ def extractWords(image, lines):
 				# we ignore the ones which has height smaller than half the average letter size
 				# this will remove full stops and commas as an individual component
 				count = 0
-				for k in range(line[1]-line[0]):
-					row = thresh[line[0]+k:line[0]+k+1, wordStart:wordEnd] # y1:y2, x1:x2
+				for k in range(int(line[1])-int(line[0])):
+					row = thresh[int(line[0])+k:int(line[0])+k+1, wordStart:wordEnd] # y1:y2, x1:x2
 					if(np.sum(row)):
 						count += 1
 				if(count > int(LETTER_SIZE/2)):
-					words.append([line[0], line[1], wordStart, wordEnd])
+					words.append([int(line[0]), int(line[1]), wordStart, wordEnd])
 					
 				setWordStart = True # next time we encounter value > 0, it's begining of another word/component so we set new wordStart
 		
 		space_zero.extend(spaces[1:-1])
 	
-	#print space_zero
+	#print( space_zero)
 	space_columns = np.sum(space_zero)
 	space_count = len(space_zero)
 	if(space_count == 0):
@@ -481,8 +486,8 @@ def extractWords(image, lines):
 	average_word_spacing = float(space_columns) / space_count
 	relative_word_spacing = average_word_spacing / LETTER_SIZE
 	WORD_SPACING = relative_word_spacing
-	#print "Average word spacing: "+str(average_word_spacing)
-	#print ("Average word spacing relative to average letter size: "+str(relative_word_spacing))
+	#print( "Average word spacing: "+str(average_word_spacing))
+	#print( ("Average word spacing relative to average letter size: "+str(relative_word_spacing)))
 	
 	return words
 		
@@ -595,10 +600,10 @@ def extractSlant(img, words):
 				h_wted = (h_sq * num_fgpixel) / height
 
 				'''
-				# just printing
+				# just print(ing)
 				if(j==0):
-					print column
-					print str(i)+' h_sq='+str(h_sq)+' h_wted='+str(h_wted)+' num_fgpixel='+str(num_fgpixel)+' delta_y='+str(delta_y)
+					print( column)
+					print( str(i)+' h_sq='+str(h_sq)+' h_wted='+str(h_wted)+' num_fgpixel='+str(num_fgpixel)+' delta_y='+str(delta_y))
 				'''
 				
 				# add up the values from all the loops of ALL the columns of ALL the words in the image
@@ -611,9 +616,9 @@ def extractSlant(img, words):
 				#plt.subplot(),plt.imshow(deslanted),plt.title('Output '+str(i))
 				#plt.show()
 				cv2.imshow('Output '+str(i)+str(j), deslanted)
-				#print vp
-				#print 'line '+str(i)+' '+str(s_temp)
-				#print
+				#print( vp)
+				#print( 'line '+str(i)+' '+str(s_temp))
+				#print()
 			'''
 				
 		s_function[i] = s_temp
@@ -623,7 +628,7 @@ def extractSlant(img, words):
 	max_value = 0.0
 	max_index = 4
 	for index, value in enumerate(s_function):
-		#print str(index)+" "+str(value)+" "+str(count_[index])
+		#print( str(index)+" "+str(value)+" "+str(count_[index]))
 		if(value > max_value):
 			max_value = value
 			max_index = index
@@ -657,7 +662,7 @@ def extractSlant(img, words):
 	elif(max_index == 4):
 		p = s_function[4] / s_function[3]
 		q = s_function[4] / s_function[5]
-		#print 'p='+str(p)+' q='+str(q)
+		#print( 'p='+str(p)+' q='+str(q))
 		# the constants here are abritrary but I think suits the best
 		if((p <= 1.2 and q <= 1.2) or (p > 1.4 and q > 1.4)):
 			angle = 0
@@ -672,32 +677,34 @@ def extractSlant(img, words):
 		
 		
 		if angle == 0:
-			print "\n************************************************"
-			print "Slant determined to be straight."
+			print( "\n************************************************")
+			print( "Slant determined to be straight.")
 		else:
-			print "\n************************************************"
-			print "Slant determined to be irregular."
-		cv2.imshow("Check Image", img)
+			print( "\n************************************************")
+			print( "Slant determined to be irregular.")
+		cv2.imshow("image_check", img)
 		cv2.waitKey(0)
-		cv2.destroyAllWindows()
-		type = raw_input("Press enter if okay, else enter c to change: ")
+		type = input("Press enter if okay, else enter c to change: ")
+		cv2.destroyWindow("image_check")
+		# cv2.destroyAllWindows()
+
 		if type=='c':
 			if angle == 0:
 				angle = 180
 				result =  " : Irregular Slant"
-				print "Set as"+result
-				print "************************************************\n"
+				print( "Set as"+result)
+				print( "************************************************\n")
 			else:
 				angle = 0
 				result = " : Straight/No Slant"
-				print "Set as"+result
-				print "************************************************\n"
+				print( "Set as"+result)
+				print( "************************************************\n")
 		else:
-			print "No Change!"
-			print "************************************************\n"
+			print( "No Change!")
+			print( "************************************************\n")
 		
 	SLANT_ANGLE = angle
-	#print ("Slant angle(degree): "+str(SLANT_ANGLE)+result)
+	#print( ("Slant angle(degree): "+str(SLANT_ANGLE)+result))
 	return
 
 ''' function to extract average pen pressure of the handwriting '''
@@ -735,14 +742,15 @@ def barometer(image):
 				
 	average_intensity = float(total_intensity) / pixel_count
 	PEN_PRESSURE = average_intensity
-	#print total_intensity
-	#print pixel_count
-	#print ("Average pen pressure: "+str(average_intensity))
+	#print( total_intensity)
+	#print( pixel_count)
+	#print( ("Average pen pressure: "+str(average_intensity)))
 
 	return
 	
 ''' main '''
 def start(file_name):
+	print("Starting extraction "+file_name)
 
 	global BASELINE_ANGLE
 	global TOP_MARGIN
@@ -767,15 +775,15 @@ def start(file_name):
 	# extract lines of handwritten text from the image using the horizontal projection
 	# it returns a 2D list of the vertical starting and ending index/pixel row location of each line in the handwriting
 	lineIndices = extractLines(straightened)
-	#print lineIndices
-	#print
+	#print( lineIndices)
+	#print()
 	
 	# extract words from each line using vertical projection
 	# it returns a 4D list of the vertical starting and ending indices and horizontal starting and ending indices (in that order) of each word in the handwriting
 	wordCoordinates = extractWords(straightened, lineIndices)
 	
-	#print wordCoordinates
-	#print len(wordCoordinates)
+	#print( wordCoordinates)
+	#print( len(wordCoordinates))
 	#for i, item in enumerate(wordCoordinates):
 	#	cv2.imshow('item '+str(i), straightened[item[0]:item[1], item[2]:item[3]])
 	

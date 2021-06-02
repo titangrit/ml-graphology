@@ -2,10 +2,10 @@ import os
 import categorize
 
 if os.path.isfile("feature_list"):
-	print ("Error: feature_list already exists.")
+	print("Error: feature_list already exists.")
 
 elif os.path.isfile("raw_feature_list"):
-	print ("Info: raw_feature_list found.")
+	print("Info: raw_feature_list found.")
 	with open("raw_feature_list", "r") as raw_features, open("feature_list", "a") as features:
 		for line in raw_features:
 			content = line.split()
@@ -36,7 +36,7 @@ elif os.path.isfile("raw_feature_list"):
 			features.write("%s\t" % str(slant_angle))
 			features.write("%s\t" % str(page_id))
 			print>>features, ''
-	print "Done!"
+	print("Done!")
 	
 else:
-	print ("Error: raw_feature_list file not found.")
+	print("Error: raw_feature_list file not found.")

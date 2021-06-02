@@ -7,7 +7,7 @@ os.chdir("..")
 
 page_ids = []
 if os.path.isfile("raw_feature_list"):
-	print ("Info: raw_feature_list already exists.")
+	print("Info: raw_feature_list already exists.")
 	with open("raw_feature_list", "r") as label:
 		for line in label:
 			content = line.split()
@@ -27,4 +27,4 @@ with open("raw_feature_list", "a") as label:
 		count += 1
 		progress = (count*100)/len(files)
 		print str(count)+' '+file_name+' '+str(progress)+'%'
-	print "Done!"
+	print("Done!")
