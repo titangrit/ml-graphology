@@ -7,6 +7,10 @@ import cv2
 import numpy as np
 import math
 #from matplotlib import pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
+warnings.simplefilter('ignore')
 
 # please don't worry about these two variables now
 ANCHOR_POINT = 6000
@@ -340,7 +344,7 @@ def extractLines(img):
 	lines_having_midzone_count = 0
 	flag = False
 	for i, line in enumerate(fineLines):
-		segment = hpList[line[0]:line[1]]
+		segment = hpList[int(line[0]):int(line[1])]
 		for j, sum in enumerate(segment):
 			if(sum<MIDZONE_THRESHOLD):
 				space_nonzero_row_count += 1
@@ -415,7 +419,7 @@ def extractWords(image, lines):
 	
 	# Isolated words or components will be extacted from each line by looking at occurance of 0's in its vertical projection.
 	for i, line in enumerate(lines):
-		extract = thresh[line[0]:line[1], 0:width] # y1:y2, x1:x2
+		extract = thresh[int(line[0]):int(line[1]), 0:width] # y1:y2, x1:x2
 		vp = verticalProjection(extract)
 		#print i
 		#print vp
@@ -464,7 +468,7 @@ def extractWords(image, lines):
 				# we ignore the ones which has height smaller than half the average letter size
 				# this will remove full stops and commas as an individual component
 				count = 0
-				for k in range(line[1]-line[0]):
+				for k in range(int(line[1])-int(line[0])):
 					row = thresh[line[0]+k:line[0]+k+1, wordStart:wordEnd] # y1:y2, x1:x2
 					if(np.sum(row)):
 						count += 1
@@ -481,6 +485,8 @@ def extractWords(image, lines):
 	if(space_count == 0):
 		space_count = 1
 	average_word_spacing = float(space_columns) / space_count
+	if(LETTER_SIZE==0):
+		LETTER_SIZE=1
 	relative_word_spacing = average_word_spacing / LETTER_SIZE
 	WORD_SPACING = relative_word_spacing
 	#print "Average word spacing: "+str(average_word_spacing)
@@ -522,10 +528,10 @@ def extractSlant(img, words):
 		
 		#loop for each word
 		for j, word in enumerate(words):
-			original = thresh[word[0]:word[1], word[2]:word[3]] # y1:y2, x1:x2
+			original = thresh[int(word[0]):int(word[1]), int(word[2]):int(word[3])] # y1:y2, x1:x2
 
-			height = word[1]-word[0]
-			width = word[3]-word[2]
+			height = int(word[1])-int(word[0])
+			width = int(word[3])- int(word[2])
 			
 			# the distance in pixel we will shift for affine transformation
 			# it's divided by 2 because the uppermost point and the lowermost points are being equally shifted in opposite directions
