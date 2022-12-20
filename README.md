@@ -18,7 +18,7 @@ Support Vector Machines (SVM) are used to classify the following handwriting fea
 ## Project Structure
 1. The `extract_routine.py` reads the handwriting images from a folder named `images` in the same directory and extracts all the features by calling `extract.py`. The extracted raw feature values are stored in a file `raw_feature_list`.
 2. The `raw_feature_list` is read by `feature_routine.py` and mapped into discrete values. The discrete values are put into a file `feature_list`.
-3. The `label_routine.py` generates the project specific graphology traits by reading the `feature_list` into a file `label_list`. The `label_list` is used for training the classifiers.
+3. The `label_routine.py` generates the personality traits of the handwriting features into a file `label_list` by reading the `feature_list`. This is where principles of graphology comes into picture. The `label_list` is used for training the classifiers.
 4. Combinations of the selected handwriting features are used to train eight SVM classifiers to predict eight personality traits of a handwriting image input. `train_predict.py` trains the SVM classifiers by reading the `label_list` and predicts input handwriting image.
 
 ## Training Data
