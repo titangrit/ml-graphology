@@ -26,3 +26,4 @@ For my own educational purpose, I am using the handwriting samples provided by h
 The images obtained from the above non-profit source need to be cropped and resized to have similar resolutions of 850 pixels width and ~850 pixels length so that they can be used in the program. Images modification is not in the scope of this project. You can use photoshop or any method of your choice to modify the images en masse.
 
 If you want a copy of my prepared data, you may contact me via https://www.linkedin.com/in/malem-mutum-506aa1167/
+As there is limit to the size of a commit in Github, I cannot put the data in this repository.
