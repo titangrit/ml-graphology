@@ -6,7 +6,7 @@ Although human intervention in handwriting analysis has been effective, it is co
 
 The details of the project is contained in the dissertation report `Psychological Analysis based on Handwriting Pattern with ML.pdf` provided in this repository.
 
-Support Vector Machines (SVM) are used to classify the following handwriting features.
+Support Vector Machines (SVM) are used to classify the following handwriting features into a few selected personality traits.
 1. Top margin
 2. Pen pressure
 3. Baseline angle
