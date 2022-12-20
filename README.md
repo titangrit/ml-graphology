@@ -22,3 +22,7 @@ Support Vector Machines (SVM) are used to classify the following handwriting fea
 
 ## Training Data
 For my own educational purpose, I am using the handwriting samples provided by https://fki.tic.heia-fr.ch/databases/iam-handwriting-database for non-profit usage.
+
+The images obtained from the above non-profit source need to be cropped and resized to have similar resolutions of 850 pixels width and ~850 pixels length so that they can be used in the program. Images modification is not in the scope of this project. You can use photoshop or any method of your choice to modify the images en masse.
+
+If you want a copy of my prepared data, you may contact me via https://www.linkedin.com/in/malem-mutum-506aa1167/
